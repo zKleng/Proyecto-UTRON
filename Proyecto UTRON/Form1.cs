@@ -18,8 +18,9 @@ namespace Proyecto_UTRON
         public Form1()
         {
             InitializeComponent();
-            grid = new Grid(20, 20); // Definir el tamaño del grid
-            moto = new Moto(grid.Inicio); // Posición inicial de la moto en el primer nodo
+            this.DoubleBuffered = true;
+            grid = new Grid(56, 23);
+            moto = new Moto(grid.Inicio);
         }
 
         // Método que se ejecuta cuando el formulario se carga
