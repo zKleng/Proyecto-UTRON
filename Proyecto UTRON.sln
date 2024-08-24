@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proyecto UTRON", "Proyecto UTRON\Proyecto UTRON.csproj", "{F26CB17B-C07D-46EE-B58A-C92F29368AD6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F26CB17B-C07D-46EE-B58A-C92F29368AD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F26CB17B-C07D-46EE-B58A-C92F29368AD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F26CB17B-C07D-46EE-B58A-C92F29368AD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F26CB17B-C07D-46EE-B58A-C92F29368AD6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F3BF3953-5CED-4556-A279-7CC82D1B5BC3}
+	EndGlobalSection
+EndGlobal
