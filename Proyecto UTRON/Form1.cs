@@ -19,8 +19,8 @@ namespace Proyecto_UTRON
         {
             InitializeComponent();
             this.DoubleBuffered = true;
-            grid = new Grid(20, 20);
-            moto = new Moto(grid.Inicio);
+            grid = new Grid(54, 23);
+            moto = new Moto(grid.Inicio, grid); // Asegúrate de pasar el grid al constructor de Moto
         }
 
         // Método que se ejecuta cuando el formulario se carga
@@ -69,6 +69,16 @@ namespace Proyecto_UTRON
                 }
                 actual = actual.Abajo;
             }
+
+            // Mostrar estadísticas
+            e.Graphics.DrawString($"Velocidad: {moto.Velocidad}", this.Font, Brushes.Black, new PointF(10, 500));
+            e.Graphics.DrawString($"Tamaño Estela: {moto.TamanoEstela}", this.Font, Brushes.Black, new PointF(10, 520));
+            e.Graphics.DrawString($"Combustible: {moto.Combustible}", this.Font, Brushes.Black, new PointF(10, 550));
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            // Elimina este método si no usas un Label en tu formulario
         }
     }
 }

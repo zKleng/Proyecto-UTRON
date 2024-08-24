@@ -1,64 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Proyecto_UTRON;
 
-namespace Proyecto_UTRON
+public class Grid
 {
-    public class Grid
+    public Nodo Inicio { get; private set; }
+    public int Ancho { get; private set; }
+    public int Alto { get; private set; }
+
+    public Grid(int ancho, int alto)
     {
-        public Nodo Inicio { get; private set; }
-        public int Ancho { get; }
-        public int Alto { get; }
+        Ancho = ancho;
+        Alto = alto;
+        CrearGrid();
+    }
 
-        public Grid(int ancho, int alto)
+    private void CrearGrid()
+    {
+        Nodo[,] nodos = new Nodo[Ancho, Alto];
+
+        for (int x = 0; x < Ancho; x++)
         {
-            Ancho = ancho;
-            Alto = alto;
-            InicializarGrid();
-        }
-
-        private void InicializarGrid()
-        {
-            Nodo nodoArriba = null;
-            Nodo nodoIzquierda = null;
-
             for (int y = 0; y < Alto; y++)
             {
-                Nodo filaAnterior = nodoArriba;
-                nodoArriba = null;
-
-                for (int x = 0; x < Ancho; x++)
-                {
-                    Nodo nuevoNodo = new Nodo(x, y);
-
-                    if (x == 0 && y == 0)
-                    {
-                        Inicio = nuevoNodo;
-                    }
-
-                    if (nodoIzquierda != null)
-                    {
-                        nuevoNodo.Izquierda = nodoIzquierda;
-                        nodoIzquierda.Derecha = nuevoNodo;
-                    }
-
-                    if (filaAnterior != null)
-                    {
-                        nuevoNodo.Arriba = filaAnterior;
-                        filaAnterior.Abajo = nuevoNodo;
-                        filaAnterior = filaAnterior.Derecha;
-                    }
-
-                    nodoIzquierda = nuevoNodo;
-
-                    if (nodoArriba == null)
-                    {
-                        nodoArriba = nuevoNodo;
-                    }
-                }
+                nodos[x, y] = new Nodo(x, y);
             }
         }
+
+        for (int x = 0; x < Ancho; x++)
+        {
+            for (int y = 0; y < Alto; y++)
+            {
+                Nodo nodo = nodos[x, y];
+                nodo.Arriba = y > 0 ? nodos[x, y - 1] : null;
+                nodo.Abajo = y < Alto - 1 ? nodos[x, y + 1] : null;
+                nodo.Izquierda = x > 0 ? nodos[x - 1, y] : null;
+                nodo.Derecha = x < Ancho - 1 ? nodos[x + 1, y] : null;
+            }
+        }
+
+        Inicio = nodos[0, 0]; // O el nodo inicial que prefieras
+    }
+
+    public Nodo ObtenerNodoEnPos(int x, int y)
+    {
+        // Asegúrate de que las coordenadas están dentro del rango válido
+        if (x < 0 || x >= Ancho || y < 0 || y >= Alto)
+        {
+            return null; // O puedes lanzar una excepción si lo prefieres
+        }
+
+        return Inicio;
     }
 }
+
