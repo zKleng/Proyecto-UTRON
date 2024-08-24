@@ -56,31 +56,34 @@ public class Moto
                 siguienteNodo = PosicionActual.Arriba;
                 if (siguienteNodo == null)
                 {
-                    // Si llega al borde superior, ir al borde inferior
-                    siguienteNodo = grid.ObtenerNodoEnPos(PosicionActual.PosX, grid.Alto - 1);
+                    // Si llega al borde superior, ir al nodo en la misma columna pero en la última fila
+                    siguienteNodo = grid.ObtenerNodoEnPos(PosicionActual.PosX, 0);
                 }
                 break;
+
             case Direccion.Abajo:
                 siguienteNodo = PosicionActual.Abajo;
                 if (siguienteNodo == null)
                 {
-                    // Si llega al borde inferior, ir al borde superior
-                    siguienteNodo = grid.ObtenerNodoEnPos(PosicionActual.PosX, 0);
+                    // Si llega al borde inferior, ir al nodo en la misma columna pero en la primera fila
+                    siguienteNodo = grid.ObtenerNodoEnPos(0, PosicionActual.PosY);
                 }
                 break;
+
             case Direccion.Izquierda:
                 siguienteNodo = PosicionActual.Izquierda;
                 if (siguienteNodo == null)
                 {
-                    // Si llega al borde izquierdo, ir al borde derecho
-                    siguienteNodo = grid.ObtenerNodoEnPos(grid.Ancho - 1, PosicionActual.PosY);
+                    // Si llega al borde izquierdo, ir al nodo en la misma fila pero en la última columna
+                    siguienteNodo = grid.ObtenerNodoEnPos(255, PosicionActual.PosY);
                 }
                 break;
+
             case Direccion.Derecha:
                 siguienteNodo = PosicionActual.Derecha;
                 if (siguienteNodo == null)
                 {
-                    // Si llega al borde derecho, ir al borde izquierdo
+                    // Si llega al borde derecho, ir al nodo en la misma fila pero en la primera columna
                     siguienteNodo = grid.ObtenerNodoEnPos(0, PosicionActual.PosY);
                 }
                 break;
@@ -88,6 +91,7 @@ public class Moto
 
         return siguienteNodo;
     }
+
 
     private void VerificarCombustible()
     {

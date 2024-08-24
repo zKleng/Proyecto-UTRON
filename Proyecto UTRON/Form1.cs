@@ -14,6 +14,8 @@ namespace Proyecto_UTRON
     {
         private Grid grid;
         private Moto moto;
+        private Timer movimientoTimer;
+        private Direccion direccionActual;
 
         public Form1()
         {
@@ -21,6 +23,31 @@ namespace Proyecto_UTRON
             this.DoubleBuffered = true;
             grid = new Grid(54, 23);
             moto = new Moto(grid.Inicio, grid); // Asegúrate de pasar el grid al constructor de Moto
+
+            // Configurar el Timer para mover la moto automáticamente
+            movimientoTimer = new Timer();
+            movimientoTimer.Interval = 100; // Intervalo en milisegundos (ajustar según sea necesario)
+            movimientoTimer.Tick += MovimientoTimer_Tick;
+            movimientoTimer.Start();
+        }
+
+        private void MovimientoTimer_Tick(object sender, EventArgs e)
+        {
+            if (direccionActual != null)
+            {
+                // Mueve la moto en función de su velocidad
+                for (int i = 0; i < moto.Velocidad; i++)
+                {
+                    moto.Moverse(direccionActual);
+                    if (moto.Combustible <= 0)
+                    {
+                        // Detener el movimiento si se queda sin combustible
+                        movimientoTimer.Stop();
+                        break;
+                    }
+                }
+                Invalidate(); // Redibujar el formulario para reflejar el movimiento
+            }
         }
 
         // Método que se ejecuta cuando el formulario se carga
@@ -34,20 +61,19 @@ namespace Proyecto_UTRON
             switch (keyData)
             {
                 case Keys.Up:
-                    moto.Moverse(Direccion.Arriba);
+                    direccionActual = Direccion.Arriba;
                     break;
                 case Keys.Down:
-                    moto.Moverse(Direccion.Abajo);
+                    direccionActual = Direccion.Abajo;
                     break;
                 case Keys.Left:
-                    moto.Moverse(Direccion.Izquierda);
+                    direccionActual = Direccion.Izquierda;
                     break;
                 case Keys.Right:
-                    moto.Moverse(Direccion.Derecha);
+                    direccionActual = Direccion.Derecha;
                     break;
             }
 
-            Invalidate(); // Redibujar el formulario para reflejar el movimiento
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
@@ -73,12 +99,7 @@ namespace Proyecto_UTRON
             // Mostrar estadísticas
             e.Graphics.DrawString($"Velocidad: {moto.Velocidad}", this.Font, Brushes.Black, new PointF(10, 500));
             e.Graphics.DrawString($"Tamaño Estela: {moto.TamanoEstela}", this.Font, Brushes.Black, new PointF(10, 520));
-            e.Graphics.DrawString($"Combustible: {moto.Combustible}", this.Font, Brushes.Black, new PointF(10, 550));
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-            // Elimina este método si no usas un Label en tu formulario
+            e.Graphics.DrawString($"Combustible: {moto.Combustible}", this.Font, Brushes.Black, new PointF(10, 540));
         }
     }
 }
