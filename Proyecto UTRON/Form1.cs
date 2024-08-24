@@ -19,7 +19,7 @@ namespace Proyecto_UTRON
         {
             InitializeComponent();
             this.DoubleBuffered = true;
-            grid = new Grid(56, 23);
+            grid = new Grid(20, 20);
             moto = new Moto(grid.Inicio);
         }
 
@@ -72,4 +72,3 @@ namespace Proyecto_UTRON
         }
     }
 }
-

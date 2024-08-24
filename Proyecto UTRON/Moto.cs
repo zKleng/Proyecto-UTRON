@@ -1,47 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Proyecto_UTRON;
 
-namespace Proyecto_UTRON
+public class Moto
 {
-    public class Moto
-    {
-        public Nodo PosicionActual { get; private set; }
+    public Nodo PosicionActual { get; private set; }
 
-        public Moto(Nodo posicionInicial)
+    public Moto(Nodo posicionInicial)
+    {
+        PosicionActual = posicionInicial;
+        PosicionActual.Ocupado = true;
+    }
+
+    public void Moverse(Direccion direccion)
+    {
+        Nodo siguientePosicion = null;
+
+        switch (direccion)
         {
-            PosicionActual = posicionInicial;
-            PosicionActual.Ocupado = true;
+            case Direccion.Arriba:
+                siguientePosicion = PosicionActual.Arriba;
+                break;
+            case Direccion.Abajo:
+                siguientePosicion = PosicionActual.Abajo;
+                break;
+            case Direccion.Izquierda:
+                siguientePosicion = PosicionActual.Izquierda;
+                break;
+            case Direccion.Derecha:
+                siguientePosicion = PosicionActual.Derecha;
+                break;
         }
 
-        public void Moverse(Direccion direccion)
+        if (siguientePosicion != null && !siguientePosicion.Ocupado)
         {
-            Nodo siguientePosicion = null;
-
-            switch (direccion)
-            {
-                case Direccion.Arriba:
-                    siguientePosicion = PosicionActual.Arriba;
-                    break;
-                case Direccion.Abajo:
-                    siguientePosicion = PosicionActual.Abajo;
-                    break;
-                case Direccion.Izquierda:
-                    siguientePosicion = PosicionActual.Izquierda;
-                    break;
-                case Direccion.Derecha:
-                    siguientePosicion = PosicionActual.Derecha;
-                    break;
-            }
-
-            if (siguientePosicion != null && !siguientePosicion.Ocupado)
-            {
-                PosicionActual.Ocupado = false;
-                PosicionActual = siguientePosicion;
-                PosicionActual.Ocupado = true;
-            }
+            PosicionActual.Ocupado = false;
+            PosicionActual = siguientePosicion;
+            PosicionActual.Ocupado = true;
         }
     }
 }
