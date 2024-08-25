@@ -1,111 +1,133 @@
-﻿using Proyecto_UTRON;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
-public class Moto
+namespace Proyecto_UTRON
 {
-    public Nodo PosicionActual { get; private set; }
-    private Grid grid;
-    private Random random = new Random();
-
-    public int Velocidad { get; private set; }
-    public int TamanoEstela { get; private set; }
-    public int Combustible { get; private set; }
-    private int celdasRecorridas;
-    private Direccion direccion;
-
-    public Moto(Nodo posicionInicial, Grid grid)
+    public class Moto
     {
-        PosicionActual = posicionInicial;
-        this.grid = grid;
-        Velocidad = random.Next(1, 11); // Velocidad entre 1 y 10
-        TamanoEstela = 3; // Tamaño inicial de la estela
-        Combustible = 100; // Valor inicial del combustible
-        celdasRecorridas = 0;
-        PosicionActual.Ocupado = true;
-    }
+        public Nodo PosicionActual { get; private set; }
+        private Grid grid;
+        private Random random = new Random();
 
-    public void Moverse(Direccion direccion)
-    {
-        if (Combustible <= 0)
+        public int Velocidad { get; private set; }
+        public int TamanoEstela { get; private set; }
+        public int Combustible { get; private set; }
+        private int celdasRecorridas;
+        private Direccion direccion;
+
+        // La estela es una lista de tuplas que contiene el nodo y su tiempo de creación
+        public List<(Nodo nodo, DateTime tiempoCreacion)> Estela { get; private set; }
+
+        public Moto(Nodo posicionInicial, Grid grid)
         {
-            // Si no hay combustible, no mover la moto
-            return;
-        }
-
-        this.direccion = direccion;
-        Nodo siguientePosicion = ObtenerNodoSiguiente(direccion);
-
-        if (siguientePosicion != null && !siguientePosicion.Ocupado)
-        {
-            PosicionActual.Ocupado = false;
-            PosicionActual = siguientePosicion;
+            PosicionActual = posicionInicial;
+            this.grid = grid;
+            Velocidad = 2; // Velocidad entre 1 y 10
+            TamanoEstela = 3; // Tamaño inicial de la estela
+            Combustible = 100; // Valor inicial del combustible
+            celdasRecorridas = 0;
+            Estela = new List<(Nodo nodo, DateTime tiempoCreacion)>();
             PosicionActual.Ocupado = true;
-
-            celdasRecorridas++;
-            VerificarCombustible();
-        }
-    }
-
-    private Nodo ObtenerNodoSiguiente(Direccion direccion)
-    {
-        Nodo siguienteNodo = null;
-
-        switch (direccion)
-        {
-            case Direccion.Arriba:
-                siguienteNodo = PosicionActual.Arriba;
-                if (siguienteNodo == null)
-                {
-                    // Si llega al borde superior, ir al nodo en la misma columna pero en la última fila
-                    siguienteNodo = grid.ObtenerNodoEnPos(PosicionActual.PosX, 0);
-                }
-                break;
-
-            case Direccion.Abajo:
-                siguienteNodo = PosicionActual.Abajo;
-                if (siguienteNodo == null)
-                {
-                    // Si llega al borde inferior, ir al nodo en la misma columna pero en la primera fila
-                    siguienteNodo = grid.ObtenerNodoEnPos(0, PosicionActual.PosY);
-                }
-                break;
-
-            case Direccion.Izquierda:
-                siguienteNodo = PosicionActual.Izquierda;
-                if (siguienteNodo == null)
-                {
-                    // Si llega al borde izquierdo, ir al nodo en la misma fila pero en la última columna
-                    siguienteNodo = grid.ObtenerNodoEnPos(255, PosicionActual.PosY);
-                }
-                break;
-
-            case Direccion.Derecha:
-                siguienteNodo = PosicionActual.Derecha;
-                if (siguienteNodo == null)
-                {
-                    // Si llega al borde derecho, ir al nodo en la misma fila pero en la primera columna
-                    siguienteNodo = grid.ObtenerNodoEnPos(0, PosicionActual.PosY);
-                }
-                break;
         }
 
-        return siguienteNodo;
-    }
-
-
-    private void VerificarCombustible()
-    {
-        // Se consume 1 celda de combustible por cada 5 celdas recorridas
-        if (celdasRecorridas >= 5)
+        public void Moverse(Direccion direccion)
         {
-            Combustible -= 1;
-            celdasRecorridas = 0; // Resetear el contador de celdas
+            if (Combustible <= 0)
+            {
+                return;
+            }
+
+            this.direccion = direccion;
+            Nodo siguientePosicion = ObtenerNodoSiguiente(direccion);
+
+            if (siguientePosicion != null && !siguientePosicion.Ocupado)
+            {
+                // Actualizar la estela
+                Estela.Add((PosicionActual, DateTime.Now));
+
+                // Liberar la posición anterior y mover la moto
+                PosicionActual.Ocupado = false;
+                PosicionActual = siguientePosicion;
+                PosicionActual.Ocupado = true;
+
+                // Verificar el tiempo de vida de la estela y eliminar nodos después de 4 segundos
+                ActualizarEstela();
+
+                celdasRecorridas++;
+                VerificarCombustible();
+            }
         }
 
-        // Asegurar que el combustible no sea menor a 0
-        if (Combustible < 0)
+        private void ActualizarEstela()
         {
-            Combustible = 0;
+            DateTime tiempoActual = DateTime.Now;
+
+            // Filtrar los nodos cuya estela ha expirado (más de 4 segundos)
+            foreach (var (nodo, tiempoCreacion) in Estela.ToList())
+            {
+                if ((tiempoActual - tiempoCreacion).TotalSeconds > 4)
+                {
+                    nodo.Ocupado = false;
+                    Estela.Remove((nodo, tiempoCreacion));
+                }
+            }
+        }
+
+        private Nodo ObtenerNodoSiguiente(Direccion direccion)
+        {
+            Nodo siguienteNodo = null;
+
+            switch (direccion)
+            {
+                case Direccion.Arriba:
+                    siguienteNodo = PosicionActual.Arriba;
+                    if (siguienteNodo == null)
+                    {
+                        siguienteNodo = grid.ObtenerNodoEnPos(PosicionActual.PosX, 0);
+                    }
+                    break;
+
+                case Direccion.Abajo:
+                    siguienteNodo = PosicionActual.Abajo;
+                    if (siguienteNodo == null)
+                    {
+                        siguienteNodo = grid.ObtenerNodoEnPos(0, PosicionActual.PosY);
+                    }
+                    break;
+
+                case Direccion.Izquierda:
+                    siguienteNodo = PosicionActual.Izquierda;
+                    if (siguienteNodo == null)
+                    {
+                        siguienteNodo = grid.ObtenerNodoEnPos(255, PosicionActual.PosY);
+                    }
+                    break;
+
+                case Direccion.Derecha:
+                    siguienteNodo = PosicionActual.Derecha;
+                    if (siguienteNodo == null)
+                    {
+                        siguienteNodo = grid.ObtenerNodoEnPos(0, PosicionActual.PosY);
+                    }
+                    break;
+            }
+
+            return siguienteNodo;
+        }
+
+        private void VerificarCombustible()
+        {
+            if (celdasRecorridas >= 5)
+            {
+                Combustible -= 1;
+                celdasRecorridas = 0;
+            }
+
+            if (Combustible < 0)
+            {
+                Combustible = 0;
+            }
         }
     }
 }

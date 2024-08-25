@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Proyecto_UTRON
@@ -22,26 +18,23 @@ namespace Proyecto_UTRON
             InitializeComponent();
             this.DoubleBuffered = true;
             grid = new Grid(54, 23);
-            moto = new Moto(grid.Inicio, grid); // Asegúrate de pasar el grid al constructor de Moto
+            moto = new Moto(grid.Inicio, grid);
 
-            // Configurar el Timer para mover la moto automáticamente
             movimientoTimer = new Timer();
-            movimientoTimer.Interval = 100; // Intervalo en milisegundos (ajustar según sea necesario)
+            movimientoTimer.Interval = 100;
             movimientoTimer.Tick += MovimientoTimer_Tick;
             movimientoTimer.Start();
         }
 
         private void MovimientoTimer_Tick(object sender, EventArgs e)
         {
-            if (direccionActual != null)
+            if (direccionActual != Direccion.Ninguna)
             {
-                // Mueve la moto en función de su velocidad
                 for (int i = 0; i < moto.Velocidad; i++)
                 {
                     moto.Moverse(direccionActual);
                     if (moto.Combustible <= 0)
                     {
-                        // Detener el movimiento si se queda sin combustible
                         movimientoTimer.Stop();
                         break;
                     }
@@ -50,10 +43,8 @@ namespace Proyecto_UTRON
             }
         }
 
-        // Método que se ejecuta cuando el formulario se carga
         private void Form1_Load(object sender, EventArgs e)
         {
-            // Puedes agregar cualquier código que necesites ejecutar al cargar el formulario
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -94,6 +85,12 @@ namespace Proyecto_UTRON
                     fila = fila.Derecha;
                 }
                 actual = actual.Abajo;
+            }
+
+            // Dibujar la estela
+            foreach (var (nodo, tiempoCreacion) in moto.Estela)
+            {
+                e.Graphics.FillRectangle(Brushes.Red, nodo.PosX * 20, nodo.PosY * 20, 20, 20);
             }
 
             // Mostrar estadísticas

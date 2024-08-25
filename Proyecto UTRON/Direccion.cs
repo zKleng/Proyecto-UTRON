@@ -8,6 +8,7 @@ namespace Proyecto_UTRON
 {
     public enum Direccion
     {
+        Ninguna, // Esta opción representa la ausencia de dirección
         Arriba,
         Abajo,
         Izquierda,
