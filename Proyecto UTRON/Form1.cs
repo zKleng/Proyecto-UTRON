@@ -11,7 +11,10 @@ namespace Proyecto_UTRON
         private Grid grid;
         private Moto moto;
         private Timer movimientoTimer;
-        private Direccion direccionActual;
+        private Timer generacionItemsPoderesTimer;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS0649:Field is never assigned to, and will always have its default value")]
+        private Direccion direccionActual = Direccion.Ninguna; // Inicializar con un valor predeterminado
+        private FlowLayoutPanel panelPoderes; // Panel para mostrar los poderes como botones
 
         public Form1()
         {
@@ -24,32 +27,30 @@ namespace Proyecto_UTRON
             movimientoTimer.Interval = 100;
             movimientoTimer.Tick += MovimientoTimer_Tick;
             movimientoTimer.Start();
-        }
 
-        private void MovimientoTimer_Tick(object sender, EventArgs e)
-        {
-            if (direccionActual != Direccion.Ninguna)
+            // Timer para generar ítems y poderes cada 5 segundos
+            generacionItemsPoderesTimer = new Timer();
+            generacionItemsPoderesTimer.Interval = 5000;
+            generacionItemsPoderesTimer.Tick += GeneracionItemsPoderesTimer_Tick;
+            generacionItemsPoderesTimer.Start();
+
+            // Panel para mostrar los poderes
+            panelPoderes = new FlowLayoutPanel
             {
-                for (int i = 0; i < moto.Velocidad; i++)
-                {
-                    moto.Moverse(direccionActual);
-                    if (moto.Combustible <= 0)
-                    {
-                        movimientoTimer.Stop();
-                        break;
-                    }
-                }
-                Invalidate(); // Redibujar el formulario para reflejar el movimiento
-            }
+                Location = new Point(1120, 20),
+                Size = new Size(200, 300),
+                AutoScroll = true
+            };
+            Controls.Add(panelPoderes);
+
+            // Agregar manejador de eventos para las teclas
+            this.KeyDown += Form1_KeyDown;
+            this.KeyPreview = true; // Asegúrate de que el formulario reciba eventos de teclado
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-        }
-
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            switch (keyData)
+            switch (e.KeyCode)
             {
                 case Keys.Up:
                     direccionActual = Direccion.Arriba;
@@ -64,8 +65,54 @@ namespace Proyecto_UTRON
                     direccionActual = Direccion.Derecha;
                     break;
             }
+        }
 
-            return base.ProcessCmdKey(ref msg, keyData);
+        private void MovimientoTimer_Tick(object sender, EventArgs e)
+        {
+            if (direccionActual != Direccion.Ninguna)
+            {
+                for (int i = 0; i < moto.Velocidad; i++)
+                {
+                    moto.Moverse(direccionActual);
+                    moto.VerificarRecoleccion();
+                    if (moto.Combustible <= 0)
+                    {
+                        movimientoTimer.Stop();
+                        break;
+                    }
+                }
+                ActualizarPanelPoderes(); // Actualizar la visualización de los poderes
+                Invalidate(); // Redibujar el formulario para reflejar el movimiento
+            }
+        }
+
+        private void GeneracionItemsPoderesTimer_Tick(object sender, EventArgs e)
+        {
+            moto.Juego.GenerarItemsYPoderes();
+        }
+
+        private void ActualizarPanelPoderes()
+        {
+            panelPoderes.Controls.Clear(); // Limpiar los botones previos
+
+            foreach (var poder in moto.PoderesRecogidos)
+            {
+                var button = new Button
+                {
+                    Text = poder.Tipo.ToString(), // Cambiado de Nombre a Tipo.ToString()
+                    Size = new Size(180, 40),
+                    BackColor = Color.LightBlue
+                };
+                button.Click += (sender, e) => UsarPoderSeleccionado(poder);
+                panelPoderes.Controls.Add(button);
+            }
+        }
+
+        private void UsarPoderSeleccionado(Poder poder)
+        {
+            poder.Aplicar(moto); // Aplicar el poder seleccionado
+            moto.PoderesRecogidos.Remove(poder); // Remover el poder usado de la lista
+            ActualizarPanelPoderes(); // Actualizar el panel después de usar el poder
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -88,9 +135,22 @@ namespace Proyecto_UTRON
             }
 
             // Dibujar la estela
-            foreach (var (nodo, tiempoCreacion) in moto.Estela)
+            NodoEstela estelaActual = moto.EstelaInicio;
+            while (estelaActual != null)
             {
-                e.Graphics.FillRectangle(Brushes.Red, nodo.PosX * 20, nodo.PosY * 20, 20, 20);
+                e.Graphics.FillRectangle(Brushes.Red, estelaActual.Nodo.PosX * 20, estelaActual.Nodo.PosY * 20, 20, 20);
+                estelaActual = estelaActual.Siguiente;
+            }
+
+            // Dibujar ítems y poderes en el mapa
+            foreach (var item in moto.Juego.Items)
+            {
+                e.Graphics.FillRectangle(Brushes.Green, item.Nodo.PosX * 20, item.Nodo.PosY * 20, 20, 20);
+            }
+
+            foreach (var poder in moto.Juego.Poderes)
+            {
+                e.Graphics.FillRectangle(Brushes.Purple, poder.Nodo.PosX * 20, poder.Nodo.PosY * 20, 20, 20);
             }
 
             // Mostrar estadísticas

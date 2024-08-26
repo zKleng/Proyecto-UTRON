@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Proyecto_UTRON
 {
@@ -10,25 +11,45 @@ namespace Proyecto_UTRON
         private Grid grid;
         private Random random = new Random();
 
-        public int Velocidad { get; private set; }
-        public int TamanoEstela { get; private set; }
-        public int Combustible { get; private set; }
+        public int Velocidad { get; set; }
+        public int TamanoEstela { get; set; }
+        public int Combustible { get; set; }
         private int celdasRecorridas;
         private Direccion direccion;
 
-        // La estela es una lista de tuplas que contiene el nodo y su tiempo de creación
-        public List<(Nodo nodo, DateTime tiempoCreacion)> Estela { get; private set; }
+        public bool EsInvencible { get; set; }
+
+        public NodoEstela EstelaInicio { get; private set; }
+
+        public Queue<Item> ColaItems { get; private set; }
+        public List<Poder> PoderesRecogidos { get; private set; } // Lista de poderes recogidos
+
+        private Timer itemTimer;
+
+        public Juego Juego { get; private set; }
 
         public Moto(Nodo posicionInicial, Grid grid)
         {
             PosicionActual = posicionInicial;
             this.grid = grid;
-            Velocidad = 2; // Velocidad entre 1 y 10
-            TamanoEstela = 3; // Tamaño inicial de la estela
-            Combustible = 100; // Valor inicial del combustible
+            Velocidad = 1;
+            TamanoEstela = 3;
+            Combustible = 100;
             celdasRecorridas = 0;
-            Estela = new List<(Nodo nodo, DateTime tiempoCreacion)>();
+            EstelaInicio = null;
             PosicionActual.Ocupado = true;
+
+            EsInvencible = false;
+
+            ColaItems = new Queue<Item>();
+            PoderesRecogidos = new List<Poder>(); // Inicializar la lista de poderes recogidos
+
+            itemTimer = new Timer();
+            itemTimer.Interval = 1000;
+            itemTimer.Tick += (sender, e) => AplicarItems();
+            itemTimer.Start();
+
+            Juego = new Juego(grid);
         }
 
         public void Moverse(Direccion direccion)
@@ -43,34 +64,46 @@ namespace Proyecto_UTRON
 
             if (siguientePosicion != null && !siguientePosicion.Ocupado)
             {
-                // Actualizar la estela
-                Estela.Add((PosicionActual, DateTime.Now));
+                EstelaInicio = new NodoEstela(PosicionActual, DateTime.Now, EstelaInicio);
 
-                // Liberar la posición anterior y mover la moto
                 PosicionActual.Ocupado = false;
                 PosicionActual = siguientePosicion;
                 PosicionActual.Ocupado = true;
 
-                // Verificar el tiempo de vida de la estela y eliminar nodos después de 4 segundos
                 ActualizarEstela();
 
                 celdasRecorridas++;
                 VerificarCombustible();
+
+                VerificarRecoleccion();
             }
         }
 
         private void ActualizarEstela()
         {
             DateTime tiempoActual = DateTime.Now;
+            NodoEstela actual = EstelaInicio;
+            NodoEstela previo = null;
 
-            // Filtrar los nodos cuya estela ha expirado (más de 4 segundos)
-            foreach (var (nodo, tiempoCreacion) in Estela.ToList())
+            while (actual != null)
             {
-                if ((tiempoActual - tiempoCreacion).TotalSeconds > 4)
+                if ((tiempoActual - actual.TiempoCreacion).TotalSeconds > 4)
                 {
-                    nodo.Ocupado = false;
-                    Estela.Remove((nodo, tiempoCreacion));
+                    if (previo == null)
+                    {
+                        EstelaInicio = actual.Siguiente;
+                    }
+                    else
+                    {
+                        previo.Siguiente = actual.Siguiente;
+                    }
                 }
+                else
+                {
+                    previo = actual;
+                }
+
+                actual = actual.Siguiente;
             }
         }
 
@@ -82,34 +115,15 @@ namespace Proyecto_UTRON
             {
                 case Direccion.Arriba:
                     siguienteNodo = PosicionActual.Arriba;
-                    if (siguienteNodo == null)
-                    {
-                        siguienteNodo = grid.ObtenerNodoEnPos(PosicionActual.PosX, 0);
-                    }
                     break;
-
                 case Direccion.Abajo:
                     siguienteNodo = PosicionActual.Abajo;
-                    if (siguienteNodo == null)
-                    {
-                        siguienteNodo = grid.ObtenerNodoEnPos(0, PosicionActual.PosY);
-                    }
                     break;
-
                 case Direccion.Izquierda:
                     siguienteNodo = PosicionActual.Izquierda;
-                    if (siguienteNodo == null)
-                    {
-                        siguienteNodo = grid.ObtenerNodoEnPos(255, PosicionActual.PosY);
-                    }
                     break;
-
                 case Direccion.Derecha:
                     siguienteNodo = PosicionActual.Derecha;
-                    if (siguienteNodo == null)
-                    {
-                        siguienteNodo = grid.ObtenerNodoEnPos(0, PosicionActual.PosY);
-                    }
                     break;
             }
 
@@ -128,6 +142,66 @@ namespace Proyecto_UTRON
             {
                 Combustible = 0;
             }
+        }
+
+        public void VerificarRecoleccion()
+        {
+            var item = Juego.Items.FirstOrDefault(i => i.Nodo == PosicionActual);
+            if (item != null)
+            {
+                RecolectarItem(item);
+                Juego.Items.Remove(item);
+            }
+
+            var poder = Juego.Poderes.FirstOrDefault(p => p.Nodo == PosicionActual);
+            if (poder != null)
+            {
+                RecolectarPoder(poder);
+                Juego.Poderes.Remove(poder);
+            }
+        }
+
+        private void RecolectarItem(Item item)
+        {
+            ColaItems.Enqueue(item);
+        }
+
+        private void RecolectarPoder(Poder poder)
+        {
+            PoderesRecogidos.Add(poder); // Añadir poder a la lista de poderes recogidos
+        }
+
+        public void UsarPoder()
+        {
+            if (PoderesRecogidos.Count > 0)
+            {
+                var poder = PoderesRecogidos[0]; // Usar el primer poder
+                poder.Aplicar(this);
+                PoderesRecogidos.RemoveAt(0); // Eliminar poder usado de la lista
+            }
+        }
+
+        private void AplicarItems()
+        {
+            if (ColaItems.Count > 0)
+            {
+                var item = ColaItems.Dequeue();
+                item.Aplicar(this);
+            }
+        }
+    }
+
+    public class NodoEstela
+    {
+        public Nodo Nodo { get; }
+        public DateTime TiempoCreacion { get; }
+        public NodoEstela Siguiente { get; set; }
+
+        public NodoEstela(Nodo nodo, DateTime tiempoCreacion, NodoEstela siguiente)
+        {
+            Nodo = nodo;
+            TiempoCreacion = tiempoCreacion;
+            Siguiente = siguiente;
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using Proyecto_UTRON;
+using System;
 
 public class Grid
 {
     public Nodo Inicio { get; private set; }
     public int Ancho { get; private set; }
     public int Alto { get; private set; }
+    private Nodo[,] nodos;
 
     public Grid(int ancho, int alto)
     {
@@ -15,7 +17,7 @@ public class Grid
 
     private void CrearGrid()
     {
-        Nodo[,] nodos = new Nodo[Ancho, Alto];
+        nodos = new Nodo[Ancho, Alto];
 
         for (int x = 0; x < Ancho; x++)
         {
@@ -42,13 +44,19 @@ public class Grid
 
     public Nodo ObtenerNodoEnPos(int x, int y)
     {
-        // Asegúrate de que las coordenadas están dentro del rango válido
         if (x < 0 || x >= Ancho || y < 0 || y >= Alto)
         {
-            return null; // O puedes lanzar una excepción si lo prefieres
+            return null;
         }
 
-        return Inicio;
+        return nodos[x, y];
+    }
+
+    public Nodo ObtenerNodoAleatorio()
+    {
+        Random rand = new Random();
+        int x = rand.Next(0, Ancho);
+        int y = rand.Next(0, Alto);
+        return nodos[x, y];
     }
 }
-
