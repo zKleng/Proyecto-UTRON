@@ -15,6 +15,10 @@ namespace Proyecto_UTRON
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS0649:Field is never assigned to, and will always have its default value")]
         private Direccion direccionActual = Direccion.Ninguna; // Inicializar con un valor predeterminado
         private FlowLayoutPanel panelPoderes; // Panel para mostrar los poderes como botones
+        private FlowLayoutPanel panelItems; // Panel para mostrar los ítems como botones
+
+        private int indiceItemSeleccionado = -1;
+        private int indicePoderSeleccionado = -1;
 
         public Form1()
         {
@@ -37,21 +41,32 @@ namespace Proyecto_UTRON
             // Panel para mostrar los poderes
             panelPoderes = new FlowLayoutPanel
             {
-                Location = new Point(1120, 20),
+                Location = new Point(1090, 20),
                 Size = new Size(200, 300),
-                AutoScroll = true
+                AutoScroll = true,
+                BackColor = Color.White // Cambia el color de fondo
             };
             Controls.Add(panelPoderes);
 
             // Agregar manejador de eventos para las teclas
             this.KeyDown += Form1_KeyDown;
             this.KeyPreview = true; // Asegúrate de que el formulario reciba eventos de teclado
+
+            panelItems = new FlowLayoutPanel
+            {
+                Location = new Point(1090, 300), // Ajusta la posición según sea necesario
+                Size = new Size(200, 300),
+                AutoScroll = true,
+                BackColor = Color.Black // Cambia el color de fondo
+            };
+            Controls.Add(panelItems);
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode)
             {
+                // Control de dirección
                 case Keys.Up:
                     direccionActual = Direccion.Arriba;
                     break;
@@ -64,8 +79,45 @@ namespace Proyecto_UTRON
                 case Keys.Right:
                     direccionActual = Direccion.Derecha;
                     break;
+
+                // Navegación y uso de ítems
+                case Keys.D1:
+                    if (moto.ColaItems.Count > 0)
+                    {
+                        indiceItemSeleccionado = (indiceItemSeleccionado + 1) % moto.ColaItems.Count;
+                        ActualizarPanelItems(); // Nueva función para actualizar la visualización de ítems
+                    }
+                    break;
+                case Keys.D2:
+                    if (indiceItemSeleccionado >= 0 && moto.ColaItems.Count > 0)
+                    {
+                        var item = moto.ColaItems.Dequeue();
+                        item.Aplicar(moto);
+                        indiceItemSeleccionado = -1; // Reiniciar selección
+                        ActualizarPanelItems(); // Actualizar después de usar el ítem
+                    }
+                    break;
+
+                // Navegación y uso de poderes
+                case Keys.A:
+                    if (moto.PilaPoderes.Count > 0)
+                    {
+                        indicePoderSeleccionado = (indicePoderSeleccionado + 1) % moto.PilaPoderes.Count;
+                        ActualizarPanelPoderes();
+                    }
+                    break;
+                case Keys.D:
+                    if (indicePoderSeleccionado >= 0 && moto.PilaPoderes.Count > 0)
+                    {
+                        var poder = moto.PilaPoderes.Pop(); // Usar el poder seleccionado
+                        poder.Aplicar(moto);
+                        indicePoderSeleccionado = -1; // Reiniciar selección
+                        ActualizarPanelPoderes();
+                    }
+                    break;
             }
         }
+
 
         private void MovimientoTimer_Tick(object sender, EventArgs e)
         {
@@ -93,18 +145,55 @@ namespace Proyecto_UTRON
 
         private void ActualizarPanelPoderes()
         {
-            panelPoderes.Controls.Clear(); // Limpiar los botones previos
+            // Evita parpadeos al habilitar el doble búfer en el panel
+            panelPoderes.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(panelPoderes, true, null);
 
-            foreach (var poder in moto.PoderesRecogidos)
+            // Obtener la cantidad actual de botones en el panel
+            int currentButtonCount = panelPoderes.Controls.Count;
+
+            // Si la cantidad de botones no coincide con la cantidad de poderes en la pila, actualizamos
+            if (currentButtonCount != moto.PilaPoderes.Count)
             {
-                var button = new Button
+                panelPoderes.Controls.Clear(); // Solo limpiar si es necesario
+
+                foreach (var poder in moto.PilaPoderes)
                 {
-                    Text = poder.Tipo.ToString(), // Cambiado de Nombre a Tipo.ToString()
-                    Size = new Size(180, 40),
-                    BackColor = Color.LightBlue
-                };
-                button.Click += (sender, e) => UsarPoderSeleccionado(poder);
-                panelPoderes.Controls.Add(button);
+                    var button = new Button
+                    {
+                        Text = poder.Tipo.ToString(),
+                        Size = new Size(180, 40),
+                        BackColor = Color.LightBlue
+                    };
+                    panelPoderes.Controls.Add(button);
+                }
+            }
+        }
+
+        private void ActualizarPanelItems()
+        {
+            // Evita parpadeos al habilitar el doble búfer en el panel de ítems
+            panelItems.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(panelItems, true, null);
+
+            // Obtener la cantidad actual de botones en el panel
+            int currentButtonCount = panelItems.Controls.Count;
+
+            // Si la cantidad de botones no coincide con la cantidad de ítems en la cola, actualizamos
+            if (currentButtonCount != moto.ColaItems.Count)
+            {
+                panelItems.Controls.Clear(); // Solo limpiar si es necesario
+
+                foreach (var item in moto.ColaItems)
+                {
+                    var button = new Button
+                    {
+                        Text = item.Tipo.ToString(),
+                        Size = new Size(180, 40),
+                        BackColor = Color.LightGreen
+                    };
+                    panelItems.Controls.Add(button);
+                }
             }
         }
 

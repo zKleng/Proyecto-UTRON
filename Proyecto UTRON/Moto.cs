@@ -22,11 +22,13 @@ namespace Proyecto_UTRON
         public NodoEstela EstelaInicio { get; private set; }
 
         public Queue<Item> ColaItems { get; private set; }
-        public List<Poder> PoderesRecogidos { get; private set; } // Lista de poderes recogidos
+        public Stack<Poder> PilaPoderes { get; private set; } // Cambiado de List<Poder> a Stack<Poder>
+
 
         private Timer itemTimer;
 
         public Juego Juego { get; private set; }
+        public List<Poder> PoderesRecogidos { get; private set; }
 
         public Moto(Nodo posicionInicial, Grid grid)
         {
@@ -42,7 +44,7 @@ namespace Proyecto_UTRON
             EsInvencible = false;
 
             ColaItems = new Queue<Item>();
-            PoderesRecogidos = new List<Poder>(); // Inicializar la lista de poderes recogidos
+            PilaPoderes = new Stack<Poder>(); // Inicializar la pila de poderes
 
             itemTimer = new Timer();
             itemTimer.Interval = 1000;
@@ -168,16 +170,15 @@ namespace Proyecto_UTRON
 
         private void RecolectarPoder(Poder poder)
         {
-            PoderesRecogidos.Add(poder); // Añadir poder a la lista de poderes recogidos
+            PilaPoderes.Push(poder); // Añadir poder a la pila
         }
 
         public void UsarPoder()
         {
-            if (PoderesRecogidos.Count > 0)
+            if (PilaPoderes.Count > 0)
             {
-                var poder = PoderesRecogidos[0]; // Usar el primer poder
+                var poder = PilaPoderes.Pop(); // Usar el último poder añadido
                 poder.Aplicar(this);
-                PoderesRecogidos.RemoveAt(0); // Eliminar poder usado de la lista
             }
         }
 

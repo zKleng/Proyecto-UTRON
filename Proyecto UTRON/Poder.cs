@@ -14,7 +14,6 @@ namespace Proyecto_UTRON
             Tipo = tipo;
             Nombre = nombre;
         }
-
         public void Aplicar(Moto moto)
         {
             // Lógica para aplicar el poder a la moto según su tipo
