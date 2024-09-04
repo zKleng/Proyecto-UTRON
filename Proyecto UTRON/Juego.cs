@@ -24,20 +24,32 @@ namespace Proyecto_UTRON
 
         public void GenerarItem()
         {
-            Nodo nodo = grid.ObtenerNodoAleatorio();
+            Nodo nodoItem;
+            do
+            {
+                nodoItem = grid.ObtenerNodoAleatorio();
+            } while (nodoItem.Ocupado || Poderes.Exists(p => p.Nodo == nodoItem));
+            // Verifica que no haya un poder en el mismo nodo
+
             TipoItem tipo = (TipoItem)new Random().Next(0, Enum.GetValues(typeof(TipoItem)).Length);
-            Items.Add(new Item(nodo, tipo));
+            Items.Add(new Item(nodoItem, tipo));
         }
 
         public void GenerarPoder()
         {
-            Nodo nodo = grid.ObtenerNodoAleatorio();
+            Nodo nodoPoder;
+            do
+            {
+                nodoPoder = grid.ObtenerNodoAleatorio();
+            } while (nodoPoder.Ocupado || Items.Exists(i => i.Nodo == nodoPoder));
+            // Verifica que no haya un ítem en el mismo nodo
+
             TipoPoder tipo = (TipoPoder)new Random().Next(0, Enum.GetValues(typeof(TipoPoder)).Length);
 
             // Crear un nombre para el poder basado en su tipo
-            string nombre = tipo.ToString(); // O puedes definir nombres específicos para cada tipo de poder
+            string nombre = tipo.ToString();
 
-            Poderes.Add(new Poder(nodo, tipo, nombre));
+            Poderes.Add(new Poder(nodoPoder, tipo, nombre));
         }
     }
 }

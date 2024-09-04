@@ -12,7 +12,6 @@ namespace Proyecto_UTRON
         private Moto moto;
         private Timer movimientoTimer;
         private Timer generacionItemsPoderesTimer;
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS0649:Field is never assigned to, and will always have its default value")]
         private Direccion direccionActual = Direccion.Ninguna; // Inicializar con un valor predeterminado
         private FlowLayoutPanel panelPoderes; // Panel para mostrar los poderes como botones
         private FlowLayoutPanel panelItems; // Panel para mostrar los ítems como botones
@@ -32,32 +31,29 @@ namespace Proyecto_UTRON
             movimientoTimer.Tick += MovimientoTimer_Tick;
             movimientoTimer.Start();
 
-            // Timer para generar ítems y poderes cada 5 segundos
             generacionItemsPoderesTimer = new Timer();
             generacionItemsPoderesTimer.Interval = 5000;
             generacionItemsPoderesTimer.Tick += GeneracionItemsPoderesTimer_Tick;
             generacionItemsPoderesTimer.Start();
 
-            // Panel para mostrar los poderes
             panelPoderes = new FlowLayoutPanel
             {
                 Location = new Point(1090, 20),
                 Size = new Size(200, 300),
                 AutoScroll = true,
-                BackColor = Color.White // Cambia el color de fondo
+                BackColor = Color.White
             };
             Controls.Add(panelPoderes);
 
-            // Agregar manejador de eventos para las teclas
             this.KeyDown += Form1_KeyDown;
             this.KeyPreview = true; // Asegúrate de que el formulario reciba eventos de teclado
 
             panelItems = new FlowLayoutPanel
             {
-                Location = new Point(1090, 300), // Ajusta la posición según sea necesario
+                Location = new Point(1090, 300),
                 Size = new Size(200, 300),
                 AutoScroll = true,
-                BackColor = Color.Black // Cambia el color de fondo
+                BackColor = Color.Black
             };
             Controls.Add(panelItems);
         }
@@ -85,17 +81,13 @@ namespace Proyecto_UTRON
                     if (moto.ColaItems.Count > 0)
                     {
                         indiceItemSeleccionado = (indiceItemSeleccionado + 1) % moto.ColaItems.Count;
-                        ActualizarPanelItems(); // Nueva función para actualizar la visualización de ítems
+                        ActualizarPanelItems(); // Actualizar la visualización de ítems
                     }
                     break;
                 case Keys.D2:
-                    if (indiceItemSeleccionado >= 0 && moto.ColaItems.Count > 0)
-                    {
-                        var item = moto.ColaItems.Dequeue();
-                        item.Aplicar(moto);
-                        indiceItemSeleccionado = -1; // Reiniciar selección
-                        ActualizarPanelItems(); // Actualizar después de usar el ítem
-                    }
+                    moto.UsarItem(indiceItemSeleccionado); // Usar el ítem seleccionado
+                    indiceItemSeleccionado = -1; // Reiniciar selección
+                    ActualizarPanelItems(); // Actualizar la visualización de ítems
                     break;
 
                 // Navegación y uso de poderes
@@ -118,6 +110,17 @@ namespace Proyecto_UTRON
             }
         }
 
+
+        private void UsarItem()
+        {
+            if (indiceItemSeleccionado >= 0 && moto.ColaItems.Count > 0)
+            {
+                var item = moto.ColaItems.ElementAt(indiceItemSeleccionado);
+                item.Aplicar(moto); // Aplica el ítem y lo elimina de la cola
+                indiceItemSeleccionado = -1; // Reiniciar selección
+                ActualizarPanelItems(); // Actualizar después de usar el ítem
+            }
+        }
 
         private void MovimientoTimer_Tick(object sender, EventArgs e)
         {
@@ -145,17 +148,14 @@ namespace Proyecto_UTRON
 
         private void ActualizarPanelPoderes()
         {
-            // Evita parpadeos al habilitar el doble búfer en el panel
             panelPoderes.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 ?.SetValue(panelPoderes, true, null);
 
-            // Obtener la cantidad actual de botones en el panel
             int currentButtonCount = panelPoderes.Controls.Count;
 
-            // Si la cantidad de botones no coincide con la cantidad de poderes en la pila, actualizamos
             if (currentButtonCount != moto.PilaPoderes.Count)
             {
-                panelPoderes.Controls.Clear(); // Solo limpiar si es necesario
+                panelPoderes.Controls.Clear();
 
                 foreach (var poder in moto.PilaPoderes)
                 {
@@ -169,7 +169,6 @@ namespace Proyecto_UTRON
                 }
             }
         }
-
         private void ActualizarPanelItems()
         {
             // Evita parpadeos al habilitar el doble búfer en el panel de ítems
@@ -197,13 +196,6 @@ namespace Proyecto_UTRON
             }
         }
 
-        private void UsarPoderSeleccionado(Poder poder)
-        {
-            poder.Aplicar(moto); // Aplicar el poder seleccionado
-            moto.PoderesRecogidos.Remove(poder); // Remover el poder usado de la lista
-            ActualizarPanelPoderes(); // Actualizar el panel después de usar el poder
-        }
-
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -214,7 +206,7 @@ namespace Proyecto_UTRON
                 Nodo fila = actual;
                 while (fila != null)
                 {
-                    Color color = fila.Ocupado ? Color.Red : Color.White;
+                    Color color = fila.Ocupado ? Color.Red : Color.Black;
                     e.Graphics.FillRectangle(new SolidBrush(color), fila.PosX * 20, fila.PosY * 20, 20, 20);
                     e.Graphics.DrawRectangle(Pens.Black, fila.PosX * 20, fila.PosY * 20, 20, 20);
 
@@ -223,7 +215,6 @@ namespace Proyecto_UTRON
                 actual = actual.Abajo;
             }
 
-            // Dibujar la estela
             NodoEstela estelaActual = moto.EstelaInicio;
             while (estelaActual != null)
             {
@@ -231,7 +222,6 @@ namespace Proyecto_UTRON
                 estelaActual = estelaActual.Siguiente;
             }
 
-            // Dibujar ítems y poderes en el mapa
             foreach (var item in moto.Juego.Items)
             {
                 e.Graphics.FillRectangle(Brushes.Green, item.Nodo.PosX * 20, item.Nodo.PosY * 20, 20, 20);
@@ -242,7 +232,6 @@ namespace Proyecto_UTRON
                 e.Graphics.FillRectangle(Brushes.Purple, poder.Nodo.PosX * 20, poder.Nodo.PosY * 20, 20, 20);
             }
 
-            // Mostrar estadísticas
             e.Graphics.DrawString($"Velocidad: {moto.Velocidad}", this.Font, Brushes.Black, new PointF(10, 500));
             e.Graphics.DrawString($"Tamaño Estela: {moto.TamanoEstela}", this.Font, Brushes.Black, new PointF(10, 520));
             e.Graphics.DrawString($"Combustible: {moto.Combustible}", this.Font, Brushes.Black, new PointF(10, 540));

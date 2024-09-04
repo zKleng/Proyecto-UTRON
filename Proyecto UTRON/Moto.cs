@@ -22,13 +22,11 @@ namespace Proyecto_UTRON
         public NodoEstela EstelaInicio { get; private set; }
 
         public Queue<Item> ColaItems { get; private set; }
-        public Stack<Poder> PilaPoderes { get; private set; } // Cambiado de List<Poder> a Stack<Poder>
-
+        public Stack<Poder> PilaPoderes { get; private set; }
 
         private Timer itemTimer;
 
         public Juego Juego { get; private set; }
-        public List<Poder> PoderesRecogidos { get; private set; }
 
         public Moto(Nodo posicionInicial, Grid grid)
         {
@@ -44,7 +42,7 @@ namespace Proyecto_UTRON
             EsInvencible = false;
 
             ColaItems = new Queue<Item>();
-            PilaPoderes = new Stack<Poder>(); // Inicializar la pila de poderes
+            PilaPoderes = new Stack<Poder>();
 
             itemTimer = new Timer();
             itemTimer.Interval = 1000;
@@ -77,9 +75,10 @@ namespace Proyecto_UTRON
                 celdasRecorridas++;
                 VerificarCombustible();
 
-                VerificarRecoleccion();
+                VerificarRecoleccion(); // Solo recolectar, no aplicar
             }
         }
+
 
         private void ActualizarEstela()
         {
@@ -163,33 +162,52 @@ namespace Proyecto_UTRON
             }
         }
 
+
         private void RecolectarItem(Item item)
         {
             ColaItems.Enqueue(item);
         }
-
         private void RecolectarPoder(Poder poder)
         {
-            PilaPoderes.Push(poder); // Añadir poder a la pila
+            PilaPoderes.Push(poder);
         }
+
 
         public void UsarPoder()
         {
             if (PilaPoderes.Count > 0)
             {
-                var poder = PilaPoderes.Pop(); // Usar el último poder añadido
+                var poder = PilaPoderes.Pop();
                 poder.Aplicar(this);
             }
         }
-
         private void AplicarItems()
         {
             if (ColaItems.Count > 0)
             {
                 var item = ColaItems.Dequeue();
-                item.Aplicar(this);
+                if (item.Tipo == TipoItem.CeldaCombustible && this.Combustible >= 100)
+                {
+                    ColaItems.Enqueue(item); // No aplicar si el combustible es suficiente
+                }
+                else
+                {
+                    item.Aplicar(this); // Aplicar el ítem
+                }
             }
         }
+        public void UsarItem(int indiceItemSeleccionado)
+        {
+            if (ColaItems.Count > 0 && indiceItemSeleccionado >= 0)
+            {
+                var item = ColaItems.ElementAt(indiceItemSeleccionado);
+                item.Aplicar(this); // Aplica el ítem
+                ColaItems = new Queue<Item>(ColaItems.Where(i => i != item)); // Elimina el ítem de la cola
+            }
+        }
+
+
+
     }
 
     public class NodoEstela
