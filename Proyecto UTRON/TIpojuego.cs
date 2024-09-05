@@ -4,7 +4,6 @@
     {
         CeldaCombustible,
         MejoraVelocidad,
-        Escudo
         // Otros tipos de ítems
     }
 

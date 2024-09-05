@@ -24,9 +24,6 @@ namespace Proyecto_UTRON
                 case TipoItem.MejoraVelocidad:
                     moto.Velocidad = Math.Min(moto.Velocidad + 1, 10);
                     break;
-                case TipoItem.Escudo:
-                    moto.EsInvencible = true;
-                    break;
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Forms;
 
 namespace Proyecto_UTRON
 {
@@ -16,7 +17,6 @@ namespace Proyecto_UTRON
         }
         public void Aplicar(Moto moto)
         {
-            // Lógica para aplicar el poder a la moto según su tipo
             switch (Tipo)
             {
                 case TipoPoder.Turbo:
@@ -26,7 +26,34 @@ namespace Proyecto_UTRON
                     moto.EsInvencible = true;
                     break;
                 case TipoPoder.DoblePuntaje:
-                    // Implementar lógica de doble puntaje
+                    // Lógica para el doble puntaje
+                    break;
+            }
+
+            // Crear un timer para deshacer el efecto después de 10 segundos
+            Timer timer = new Timer();
+            timer.Interval = 10000; // 10 segundos
+            timer.Tick += (sender, e) =>
+            {
+                RemoverEfecto(moto); // Llamar a un nuevo método que remueve el efecto
+                timer.Stop();
+                timer.Dispose();
+            };
+            timer.Start();
+        }
+
+        private void RemoverEfecto(Moto moto)
+        {
+            switch (Tipo)
+            {
+                case TipoPoder.Turbo:
+                    moto.Velocidad = Math.Max(moto.Velocidad - 3, 1); // Reducir la velocidad después del turbo
+                    break;
+                case TipoPoder.Invencibilidad:
+                    moto.EsInvencible = false; // Desactivar la invencibilidad
+                    break;
+                case TipoPoder.DoblePuntaje:
+                    // Lógica para deshacer el doble puntaje
                     break;
             }
         }

@@ -161,15 +161,21 @@ namespace Proyecto_UTRON
                 Juego.Poderes.Remove(poder);
             }
         }
+        private void RecolectarPoder(Poder poder)
+        {
+            PilaPoderes.Push(poder);
+        }
 
 
         private void RecolectarItem(Item item)
         {
             ColaItems.Enqueue(item);
-        }
-        private void RecolectarPoder(Poder poder)
-        {
-            PilaPoderes.Push(poder);
+            // Actualizar el panel de ítems cuando se recoja uno
+            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form != null)
+            {
+                form.ActualizarPanelItems();
+            }
         }
 
 

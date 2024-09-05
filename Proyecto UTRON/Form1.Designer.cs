@@ -1,4 +1,4 @@
-﻿.namespace Proyecto_UTRON
+﻿namespace Proyecto_UTRON
 {
     partial class Form1
     {

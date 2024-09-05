@@ -50,7 +50,7 @@ namespace Proyecto_UTRON
 
             panelItems = new FlowLayoutPanel
             {
-                Location = new Point(1090, 300),
+                Location = new Point(1090, 350),
                 Size = new Size(200, 300),
                 AutoScroll = true,
                 BackColor = Color.Black
@@ -146,7 +146,7 @@ namespace Proyecto_UTRON
             moto.Juego.GenerarItemsYPoderes();
         }
 
-        private void ActualizarPanelPoderes()
+        public void ActualizarPanelPoderes()
         {
             panelPoderes.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 ?.SetValue(panelPoderes, true, null);
@@ -169,7 +169,7 @@ namespace Proyecto_UTRON
                 }
             }
         }
-        private void ActualizarPanelItems()
+        public void ActualizarPanelItems()
         {
             // Evita parpadeos al habilitar el doble búfer en el panel de ítems
             panelItems.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
