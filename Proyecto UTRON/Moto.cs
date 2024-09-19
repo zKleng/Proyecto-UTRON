@@ -17,21 +17,23 @@ namespace Proyecto_UTRON
         private int celdasRecorridas;
         private Direccion direccion;
 
-        public bool EsInvencible { get; set; }
+        public bool EsInvencible { get; set; } = false;
 
         public NodoEstela EstelaInicio { get; private set; }
 
         public Queue<Item> ColaItems { get; private set; }
         public Stack<Poder> PilaPoderes { get; private set; }
+        public List<Bot> Bots { get; private set; }  // Cambiado a private set
 
         private Timer itemTimer;
 
         public Juego Juego { get; private set; }
 
-        public Moto(Nodo posicionInicial, Grid grid)
+        public Moto(Nodo posicionInicial, Grid grid, List<Bot> bots)
         {
             PosicionActual = posicionInicial;
             this.grid = grid;
+            Bots = bots ?? new List<Bot>();  // Inicializa Bots si es null
             Velocidad = 1;
             TamanoEstela = 3;
             Combustible = 100;
@@ -49,7 +51,7 @@ namespace Proyecto_UTRON
             itemTimer.Tick += (sender, e) => AplicarItems();
             itemTimer.Start();
 
-            Juego = new Juego(grid);
+            Juego = new Juego(grid);  // Puedes inicializar Juego aquí si es necesario
         }
 
         public void Moverse(Direccion direccion)
@@ -79,7 +81,6 @@ namespace Proyecto_UTRON
             }
         }
 
-
         private void ActualizarEstela()
         {
             DateTime tiempoActual = DateTime.Now;
@@ -107,6 +108,42 @@ namespace Proyecto_UTRON
                 actual = actual.Siguiente;
             }
         }
+
+        public bool VerificarColisionOCombustible()
+        {
+            // Si la moto es invencible, no verificamos colisión con la estela
+            if (!EsInvencible)
+            {
+                // Colisión con la estela
+                NodoEstela actualEstela = EstelaInicio;
+                while (actualEstela != null)
+                {
+                    if (actualEstela.Nodo == PosicionActual)
+                    {
+                        return false; // No hay colisión con la estela
+                    }
+                    actualEstela = actualEstela.Siguiente;
+                }
+            }
+
+            // Verificar colisión con los bots
+            foreach (var bot in Bots)
+            {
+                if (bot.PosicionActual == PosicionActual)
+                {
+                    return true; // Colisión detectada con un bot
+                }
+            }
+
+            // Verificar si el combustible se ha agotado
+            if (Combustible <= 0)
+            {
+                return true; // Combustible agotado
+            }
+
+            return false; // No hay colisión y hay combustible
+        }
+
 
         private Nodo ObtenerNodoSiguiente(Direccion direccion)
         {
@@ -161,11 +198,11 @@ namespace Proyecto_UTRON
                 Juego.Poderes.Remove(poder);
             }
         }
+
         private void RecolectarPoder(Poder poder)
         {
             PilaPoderes.Push(poder);
         }
-
 
         private void RecolectarItem(Item item)
         {
@@ -178,7 +215,6 @@ namespace Proyecto_UTRON
             }
         }
 
-
         public void UsarPoder()
         {
             if (PilaPoderes.Count > 0)
@@ -187,6 +223,7 @@ namespace Proyecto_UTRON
                 poder.Aplicar(this);
             }
         }
+
         private void AplicarItems()
         {
             if (ColaItems.Count > 0)
@@ -202,6 +239,7 @@ namespace Proyecto_UTRON
                 }
             }
         }
+
         public void UsarItem(int indiceItemSeleccionado)
         {
             if (ColaItems.Count > 0 && indiceItemSeleccionado >= 0)
@@ -211,9 +249,6 @@ namespace Proyecto_UTRON
                 ColaItems = new Queue<Item>(ColaItems.Where(i => i != item)); // Elimina el ítem de la cola
             }
         }
-
-
-
     }
 
     public class NodoEstela

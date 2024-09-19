@@ -7,6 +7,7 @@ public class Grid
     public int Ancho { get; private set; }
     public int Alto { get; private set; }
     private Nodo[,] nodos;
+    private Random random = new Random();
 
     public Grid(int ancho, int alto)
     {
@@ -54,9 +55,27 @@ public class Grid
 
     public Nodo ObtenerNodoAleatorio()
     {
-        Random rand = new Random();
-        int x = rand.Next(0, Ancho);
-        int y = rand.Next(0, Alto);
+        int x = random.Next(0, Ancho);
+        int y = random.Next(0, Alto);
         return nodos[x, y];
+    }
+
+    // Método para obtener una posición aleatoria que no esté ocupada
+    public Nodo ObtenerPosicionAleatoria()
+    {
+        int x = random.Next(0, Ancho); // Ancho del grid
+        int y = random.Next(0, Alto);  // Alto del grid
+        Nodo nodo = ObtenerNodoEnPos(x, y);
+
+        // Asegurarse de que el nodo no esté ocupado
+        // Asegurarse de que el nodo no esté ocupado
+        while (nodo.Ocupado)
+        {
+            x = random.Next(0, Ancho);
+            y = random.Next(0, Alto);
+            nodo = ObtenerNodoEnPos(x, y);
+        }
+
+        return nodo;
     }
 }
