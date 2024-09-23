@@ -199,12 +199,12 @@ namespace Proyecto_UTRON
             }
         }
 
-        private void RecolectarPoder(Poder poder)
+        public void RecolectarPoder(Poder poder)
         {
             PilaPoderes.Push(poder);
         }
 
-        private void RecolectarItem(Item item)
+        public void RecolectarItem(Item item)
         {
             ColaItems.Enqueue(item);
             // Actualizar el panel de ítems cuando se recoja uno
@@ -224,7 +224,7 @@ namespace Proyecto_UTRON
             }
         }
 
-        private void AplicarItems()
+        public void AplicarItems()
         {
             if (ColaItems.Count > 0)
             {

@@ -123,7 +123,6 @@ namespace Proyecto_UTRON
         {
             switch (e.KeyCode)
             {
-                // Control de dirección
                 case Keys.Up:
                     direccionActual = Direccion.Arriba;
                     break;
@@ -136,40 +135,54 @@ namespace Proyecto_UTRON
                 case Keys.Right:
                     direccionActual = Direccion.Derecha;
                     break;
-
-                // Navegación y uso de ítems
-                case Keys.D1:
-                    if (moto.ColaItems.Count > 0)
-                    {
-                        indiceItemSeleccionado = (indiceItemSeleccionado + 1) % moto.ColaItems.Count;
-                        ActualizarPanelItems(); // Actualizar la visualización de ítems
-                    }
-                    break;
-                case Keys.D2:
-                    moto.UsarItem(indiceItemSeleccionado); // Usar el ítem seleccionado
-                    indiceItemSeleccionado = -1; // Reiniciar selección
-                    ActualizarPanelItems(); // Actualizar la visualización de ítems
-                    break;
-
-                // Navegación y uso de poderes
+                // Navegación de poderes
                 case Keys.A:
                     if (moto.PilaPoderes.Count > 0)
                     {
-                        indicePoderSeleccionado = (indicePoderSeleccionado + 1) % moto.PilaPoderes.Count;
-                        ActualizarPanelPoderes();
+                        // Mueve la selección hacia la izquierda
+                        indicePoderSeleccionado = (indicePoderSeleccionado - 1 + moto.PilaPoderes.Count) % moto.PilaPoderes.Count;
+                        ActualizarPanelPoderes(); // Actualiza la visualización de poderes
                     }
                     break;
                 case Keys.D:
+                    if (moto.PilaPoderes.Count > 0)
+                    {
+                        // Mueve la selección hacia la derecha
+                        indicePoderSeleccionado = (indicePoderSeleccionado + 1) % moto.PilaPoderes.Count;
+                        ActualizarPanelPoderes(); // Actualiza la visualización de poderes
+                    }
+                    break;
+
+                // Selección del poder con Enter
+                case Keys.Enter:
                     if (indicePoderSeleccionado >= 0 && moto.PilaPoderes.Count > 0)
                     {
-                        var poder = moto.PilaPoderes.Pop(); // Usar el poder seleccionado
-                        poder.Aplicar(moto);
-                        indicePoderSeleccionado = -1; // Reiniciar selección
-                        ActualizarPanelPoderes();
+                        // Convertimos la pila en un array temporal para acceder al poder seleccionado
+                        var poderesArray = moto.PilaPoderes.ToArray();
+                        var poderSeleccionado = poderesArray[indicePoderSeleccionado];
+
+                        // Aplica el poder a la moto
+                        poderSeleccionado.Aplicar(moto);
+
+                        // Reconstruye la pila excluyendo el poder seleccionado
+                        var nuevaPila = new Stack<Poder>(poderesArray.Where((p, i) => i != indicePoderSeleccionado).Reverse());
+
+                        // Vacía la pila original y empuja los elementos de la nueva pila
+                        moto.PilaPoderes.Clear();
+                        foreach (var poder in nuevaPila)
+                        {
+                            moto.PilaPoderes.Push(poder);
+                        }
+
+                        // Reinicia la selección
+                        indicePoderSeleccionado = -1;
+                        ActualizarPanelPoderes(); // Actualiza la visualización de poderes
                     }
                     break;
             }
         }
+
+
 
 
         private void UsarItem()

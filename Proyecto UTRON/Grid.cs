@@ -66,8 +66,6 @@ public class Grid
         int x = random.Next(0, Ancho); // Ancho del grid
         int y = random.Next(0, Alto);  // Alto del grid
         Nodo nodo = ObtenerNodoEnPos(x, y);
-
-        // Asegurarse de que el nodo no esté ocupado
         // Asegurarse de que el nodo no esté ocupado
         while (nodo.Ocupado)
         {

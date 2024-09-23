@@ -4,14 +4,11 @@
     {
         CeldaCombustible,
         MejoraVelocidad,
-        // Otros tipos de ítems
     }
 
     public enum TipoPoder
     {
         Turbo,
         Invencibilidad,
-        DoblePuntaje
-        // Otros tipos de poderes
     }
 }

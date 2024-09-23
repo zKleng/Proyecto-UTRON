@@ -25,9 +25,6 @@ namespace Proyecto_UTRON
                 case TipoPoder.Invencibilidad:
                     moto.EsInvencible = true;
                     break;
-                case TipoPoder.DoblePuntaje:
-                    // Lógica para el doble puntaje
-                    break;
             }
 
             // Crear un timer para deshacer el efecto después de 10 segundos
@@ -51,9 +48,6 @@ namespace Proyecto_UTRON
                     break;
                 case TipoPoder.Invencibilidad:
                     moto.EsInvencible = false; // Desactivar la invencibilidad
-                    break;
-                case TipoPoder.DoblePuntaje:
-                    // Lógica para deshacer el doble puntaje
                     break;
             }
         }
