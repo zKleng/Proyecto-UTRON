@@ -26,8 +26,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Menu;
             this.ClientSize = new System.Drawing.Size(1308, 651);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "TRON";
+            this.Text = "TRON";
             this.ResumeLayout(false);
 
         }

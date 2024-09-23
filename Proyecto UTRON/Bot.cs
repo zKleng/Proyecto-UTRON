@@ -50,6 +50,19 @@ public class Bot
         }
     }
 
+    // Propiedad para obtener el inicio de la estela (el primer nodo)
+    public Nodo EstelaInicio
+    {
+        get
+        {
+            if (estela.Count > 0)
+            {
+                return estela.First(); // Retorna el primer nodo de la estela
+            }
+            return null; // Si no hay nodos en la estela, retorna null
+        }
+    }
+
     // Elegir una dirección aleatoria
     private string ElegirDireccionAleatoria()
     {
@@ -75,7 +88,6 @@ public class Bot
         }
     }
 
-    // Verificar si el bot ha colisionado o se quedó sin combustible
     // Verificar si el bot ha colisionado o se quedó sin combustible
     public bool VerificarColisionOCombustible(Grid grid, List<Bot> bots, Nodo posicionJugador, List<Nodo> estelaJugador)
     {
@@ -103,7 +115,6 @@ public class Bot
         return false; // No hay colisión y el bot tiene combustible
     }
 
-
     // Método para verificar la colisión con la estela del jugador
     public bool VerificarColisionConEstela(List<Nodo> estelaJugador)
     {
@@ -111,3 +122,4 @@ public class Bot
         return estelaJugador.Any(nodo => nodo == PosicionActual);
     }
 }
+
